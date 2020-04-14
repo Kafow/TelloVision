@@ -57,3 +57,44 @@ class TelloController(Drone):
         response = self.response
         self.response = None
         return response
+
+    def connect(self):
+        """
+        Connect to tello sdk
+
+        Returns(str): error or ok
+        """
+        return self.__send_command("Command")
+
+    def takeoff(self):
+        return self.__send_command("takeoff")
+
+    def land(self):
+        return self.__send_command("land")
+
+    def emergency(self):
+        return self.__send_command("emergency")
+
+    def stop(self):
+        return self.__send_command("stop")
+
+    def move(self, direction: str, x: int):
+        return self.__send_command(f"{direction} {x}")
+
+    def rotate_clockwise(self, x: int):
+        return self.__send_command(f"cw {x}")
+
+    def rotate_counter_clockwise(self, x: int):
+        return self.__send_command(f"ccw {x}")
+
+    def go_to(self, x: int, y: int, z: int, speed: int):
+        return self.__send_command(f"go {x} {y} {z} {speed}")
+
+    def go_to_curve(self, x1: int, x2: int, y1: int, y2: int, z1: int, z2: int, speed: int):
+        return self.__send_command(f"curve {x1} {y1} {z1} {x2} {y2} {z2} {speed}")
+
+    def flip(self, direction: str):
+        return self.__send_command(f"flip {direction}")
+
+
+

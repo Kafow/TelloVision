@@ -38,6 +38,7 @@ class Drone(abc.ABC):
     def land(self):
         pass
 
+    @abc.abstractmethod
     def move(self, direction: str, x: int):
         pass
 
@@ -49,29 +50,23 @@ class Drone(abc.ABC):
     def stop(self):
         pass
 
-    @abc.abstractmethod
     def move_up(self, x: int):
-        pass
+        return self.move("up", x)
 
-    @abc.abstractmethod
     def move_down(self, x: int):
-        pass
+        return self.move("down", x)
 
-    @abc.abstractmethod
     def move_right(self, x: int):
-        pass
+        return self.move("right", x)
 
-    @abc.abstractmethod
     def move_left(self, x: int):
-        pass
+        return self.move("left", x)
 
-    @abc.abstractmethod
     def move_forward(self, x: int):
-        pass
+        return self.move("forward", x)
 
-    @abc.abstractmethod
     def move_backward(self, x: int):
-        pass
+        return self.move("back", x)
 
     @abc.abstractmethod
     def rotate_clockwise(self, x:int):
