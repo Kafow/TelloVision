@@ -1,6 +1,7 @@
 import socket
 import threading
-from Drone import Drone
+from drone import Drone
+from gbvision import UDPStreamReceiver
 
 
 class TelloController(Drone):
@@ -8,7 +9,7 @@ class TelloController(Drone):
     Interact simply with tello drone
     """
 
-    def __init__(self, drone_ip, drone_port, local_ip='127.0.0.1', local_port=5809, command_timeout=.3):
+    def __init__(self, drone_ip='192.168.10.1', drone_port=8889, local_ip='127.0.0.1', local_port=5809, command_timeout=.3):
         self.command_timeout = command_timeout
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((local_ip, local_port))
@@ -78,6 +79,12 @@ class TelloController(Drone):
     def stop(self):
         return self.__send_command("stop")
 
+    def start_stream(self):
+        return self.__send_command("streamon")
+
+    def stop_stream(self):
+        return self.__send_command("streamoff")
+
     def move(self, direction: str, x: int):
         return self.__send_command(f"{direction} {x}")
 
@@ -96,5 +103,13 @@ class TelloController(Drone):
     def flip(self, direction: str):
         return self.__send_command(f"flip {direction}")
 
+    def get_state(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', 8890))
+        return sock.recv(256)
 
+
+class TelloVideoReceiver(UDPStreamReceiver):
+    def __init__(self):
+        super().__init__(11111)
 
