@@ -16,7 +16,7 @@ class Drone(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def __send_command(self, command: str):
+    def send_command(self, command: str):
         """Abstract method for command sending to the drone
         Args:
             command : the command you would like to send
