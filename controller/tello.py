@@ -35,7 +35,7 @@ class TelloController(Drone):
             except Exception:
                 break
 
-    def send_command(self, command: str) -> str:  # TODO make sure the command arrives
+    def send_command(self, command: str) -> str:
         """
         Send command to Tello and wait for response
         Args:
