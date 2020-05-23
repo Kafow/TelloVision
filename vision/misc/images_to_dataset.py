@@ -2,15 +2,17 @@ from imutils.paths import list_images
 import cv2
 import os
 import numpy as np
+import random
 
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.preprocessing.image import img_to_array
 from sklearn.model_selection import train_test_split
 
 """
-Im not sure if i wanna use it because after i programmed this i found out keras has 
+Im not sure if i wanna use it because after I programmed this I found out Keras has 
 tf.keras.preprocessing.image_dataset_from_directory() function who do basically the same
 """
+
 
 class ArrowsDataset:
     def __init__(self, path_to_dataset, img_dims):
@@ -35,6 +37,8 @@ class ArrowsDataset:
 
         print("Loading images...")
         images_paths = sorted(list(list_images(self.path)))
+        random.seed(69)
+        random.shuffle(images_paths)
 
         for imagePath in images_paths:
             img = cv2.imread(imagePath)

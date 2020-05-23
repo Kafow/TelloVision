@@ -20,32 +20,21 @@ class CNN:
         # First set of layers (CONV => relu => MaxPool)
         model.add(Conv2D(32, (3, 3), input_shape=input_shape))
         model.add(Activation('relu'))
-        model.add(MaxPool2D(pool_size=(2, 2)))
+        model.add(MaxPool2D(pool_size=(3, 3)))
         model.add(Dropout(0.25))  # Dropout forth of the neurons
 
         # Second set of Layers ((CONV => RELU) *2 => MaxPool)
-        model.add(Conv2D(64, (3, 3), input_shape=input_shape))
+        model.add(Conv2D(64, (3, 3)))
         model.add(Activation('relu'))
-        model.add(MaxPool2D(pool_size=(3, 3)))
-        model.add(Conv2D(128, (3, 3), input_shape=input_shape))
+        model.add(Conv2D(64, (3, 3)))
         model.add(Activation('relu'))
-        model.add(MaxPool2D(pool_size=(3, 3)))
-        model.add(Dropout(0.25))
-
-        # Third set of Layers ((CONV => RELU) *2 => MaxPool)
-        model.add(Conv2D(128, (3, 3), input_shape=input_shape))
-        model.add(Activation('relu'))
-        model.add(MaxPool2D(pool_size=(3, 3)))
-        model.add(Conv2D(128, (3, 3), input_shape=input_shape))
-        model.add(Activation('relu'))
-        model.add(MaxPool2D(pool_size=(3, 3)))
+        model.add(MaxPool2D(pool_size=(2, 2)))
         model.add(Dropout(0.25))
 
         # Flatten the model
         model.add(Flatten())
-        model.add(Dense(1024))
         model.add(Activation("relu"))
-        model.add(Dropout(0.5))
+        #model.add(Dropout(0.5))
 
         # Final output and applying softmax filter
         model.add(Dense(num_of_outputs))
@@ -54,11 +43,11 @@ class CNN:
         return model
 
 
-image = getdataset()  # (300, w, h, 1)
-image = image / 255.0
-
-model.compile(loss='catagorical_crossentropy', optimizer=Adam(lr=0.1), metrics=['accuracy'])
-
-model.fit(x_train, y_train, validation_data=(x_test, y_test))
-
-model.evaluate(x_test.y_test)
+# image = getdataset()  # (300, w, h, 1)
+# image = image / 255.0
+#
+# model.compile(loss='catagorical_crossentropy', optimizer=Adam(lr=0.1), metrics=['accuracy'])
+#
+# model.fit(x_train, y_train, validation_data=(x_test, y_test))
+#
+# model.evaluate(x_test.y_test)
