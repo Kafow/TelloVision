@@ -43,11 +43,3 @@ class CNN:
         return model
 
 
-# image = getdataset()  # (300, w, h, 1)
-# image = image / 255.0
-#
-# model.compile(loss='catagorical_crossentropy', optimizer=Adam(lr=0.1), metrics=['accuracy'])
-#
-# model.fit(x_train, y_train, validation_data=(x_test, y_test))
-#
-# model.evaluate(x_test.y_test)

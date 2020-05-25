@@ -81,7 +81,7 @@ class Drone(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def go_to_curve (self, x1: int, x2: int, y1: int, y2: int, z1: int, z2: int, speed: int):
+    def go_to_curve(self, x1: int, x2: int, y1: int, y2: int, z1: int, z2: int, speed: int):
         pass
 
 

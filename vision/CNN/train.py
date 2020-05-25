@@ -2,9 +2,8 @@ from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import argparse
 import pickle
-
-from .model import CNN
-from ..misc.images_to_dataset import ArrowsDataset
+from vision import CNN
+from vision import ArrowsDataset
 
 # Arguments parser
 parser = argparse.ArgumentParser()
@@ -13,7 +12,7 @@ parser.add_argument("-m", "--model", help="The path for saving the model")
 parser.add_argument("-l", "--label", help="Path for saving the label binary")
 args = parser.parse_args()
 
-IMAGE_DIMS = (128, 128)
+IMAGE_DIMS = (64, 64)
 BATCH_SIZE = 32
 LR = 1e-3
 EPOCHS = 10
@@ -35,8 +34,8 @@ output = model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_siz
 try:
     with open(args.label, "wb") as f:
         print("[INFO] Saving labels bin...")
-        f.write(pickle.dumps(dataset.labels))
-        f.close()
+        f.write(pickle.dumps(dataset.lb))
+        f .close()
 except Exception as e:
     print(f"[ERROR] Saving labels failed: {e}")
 model.save(args.model)
