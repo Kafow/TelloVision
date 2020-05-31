@@ -1,24 +1,46 @@
 from controller.tello import TelloVideoReceiver, TelloController
-from vision.CNN.clasifier import classify
+from vision.CNN.clasifier import Classifier
 import pygame
 import cv2
 import numpy as np
 import time
+import threading
+import abc
+from constants import THRESHOLD, MODEL_PATH, LABELS_PATH, FPS, SPEED
 
-SPEED = 30
-FPS = 30
+
+class Controller(abc.ABC):
+    def __init__(self):
+        self.yaw_velocity = None
+        self.for_back_velocity = None
+        self.up_down_velocity = None
+        self.tello = None
+        self.in_control = None
+        self.send_rc_control = None
+        self.left_right_velocity = None
+
+    @abc.abstractmethod
+    def run(self):
+        pass
+
+    def update(self):
+        if self.in_control:  # If in control
+            if self.send_rc_control:
+                self.tello.set_rc(self.left_right_velocity, self.for_back_velocity,
+                                  self.up_down_velocity, self.yaw_velocity)
 
 
-class ManualController:
+class ManualController(Controller):
 
     def __init__(self, tello: TelloController, stream: TelloVideoReceiver):
+        super().__init__()
         pygame.init()
         pygame.display.set_caption("Tello video stream")
         self.screen = pygame.display.set_mode([960, 720])
 
         self.tello = tello
         self.video = stream
-        self.in_control = False
+        self.in_control = True
         self.send_rc_control = False
 
         self.for_back_velocity = 0
@@ -29,7 +51,6 @@ class ManualController:
     def run(self):
         self.tello.connect()
 
-        # In case streaming is on. This happens when we quit this program without the escape key.
         self.tello.stop_stream()
         self.tello.start_stream()
 
@@ -68,8 +89,9 @@ class ManualController:
             pygame.display.update()
 
             time.sleep(1 / FPS)
-        self.tello.land()
-        self.tello.stop_stream()
+        if self.in_control:
+            self.tello.land()
+            self.tello.stop_stream()
 
     def keydown(self, key_event):
         if key_event == pygame.K_UP:  # set forward velocity
@@ -106,21 +128,89 @@ class ManualController:
             not self.tello.land()
             self.send_rc_control = False
 
-    def update(self):
-        if self.in_control:  # If in control
-            if self.send_rc_control:
-                self.tello.set_rc(self.left_right_velocity, self.for_back_velocity,
-                                  self.up_down_velocity, self.yaw_velocity)
 
+class VisionController(Controller):
 
-class VisionController:
-    def __init__(self, tello: TelloController, stream: TelloVideoReceiver):
-        self.Tello = tello
-        self.receiver = stream
+    def __init__(self, tello: TelloController, video: TelloVideoReceiver):
+        super().__init__()
+        self.tello = tello
+        self.video = video
         self.in_control = False
 
+        self.yaw_velocity = None
+        self.left_right_velocity = None
+        self.for_back_velocity = None
+        self.up_down_velocity = None
+
     def run(self):
-        pass
+        should_stop = False
+        classifier = Classifier(MODEL_PATH, LABELS_PATH)
+        direction = None
+        engine = None  # To be in control of which direction we need to make speed 0
+        while not should_stop and self.in_control:
+            status, frame = self.video.read()
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame = np.rot90(frame)
+            frame = np.flipud(frame)
+            frame = THRESHOLD(frame)
+
+            if direction == 'up' or direction == 'down':
+                engine = 'up_down'
+            elif direction == 'left' or 'right':
+                engine = 'left_right'
+
+            direction = classifier.classify(frame)
+
+            if direction == 'up':
+                if engine == 'left_right':
+                    self.left_right_velocity = 0
+                self.up_down_velocity = SPEED
+
+            elif direction == 'down':
+                if engine == 'left_right':
+                    self.left_right_velocity = 0
+                self.up_down_velocity = -SPEED
+
+            elif direction == 'left':
+                if engine == 'up_down':
+                    self.up_down_velocity = 0
+                self.left_right_velocity = -SPEED
+
+            elif direction == 'right':
+                if engine == 'up_down':
+                    self.up_down_velocity = 0
+                self.left_right_velocity = SPEED
+
+            if not status:
+                break
+
+        if self.in_control:
+            self.tello.land()
+            self.tello.stop_stream()
 
     def update(self):
         pass
+
+
+class MainController:
+    def __init__(self):
+        self.tello = TelloController()
+        self.video = TelloVideoReceiver()
+
+        self.manual_controller = ManualController(self.tello, self.video)
+        self.vision_controller = VisionController(self.tello, self.video)
+        thread = threading.Thread(target=self.check_and_switch_controllers, daemon=True)
+        thread.start()
+
+    def check_and_switch_controllers(self):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.manual_controller.in_control = not self.manual_controller.in_control
+                    self.vision_controller.in_control = not self.vision_controller.in_control
+                elif event.key == pygame.K_RETURN:
+                    self.tello.emergency()
+
+    def run(self):
+        self.manual_controller.run()
+        self.vision_controller.run()

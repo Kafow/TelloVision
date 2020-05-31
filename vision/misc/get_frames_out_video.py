@@ -2,8 +2,7 @@ import cv2
 import gbvision as gbv
 import argparse
 import os
-
-THRESHOLD = gbv.ColorThreshold()  # TODO find Threshold
+from constants import THRESHOLD
 
 
 def get_frames_out(video_path, output_path):

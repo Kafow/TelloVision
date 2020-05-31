@@ -1,13 +1,10 @@
-from controller.tello import TelloController, TelloVideoReceiver
+from controller.control import MainController
 import gbvision as gbv
 
 
 def main():
-    controller = TelloController()
-    controller.connect()
-    controller.start_stream()
-    receiver = TelloVideoReceiver()
-    win = gbv.StreamWindow('win', wrap_object=receiver)
+    controller = MainController()
+    controller.run()
 
 
 if __name__ == '__main__':
