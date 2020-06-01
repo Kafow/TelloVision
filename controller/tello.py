@@ -1,7 +1,7 @@
 import socket
 import threading
 from controller.drone import Drone
-from gbvision import UDPStreamReceiver
+import cv2
 import time
 
 
@@ -11,7 +11,7 @@ class TelloController(Drone):
     """
 
     def __init__(self, drone_ip="192.168.10.1", drone_port=8889, local_ip='0.0.0.0', local_port=5809,
-                 command_timeout=3.0):
+                 command_timeout=5):
         self.command_timeout = command_timeout
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((local_ip, local_port))
@@ -120,13 +120,13 @@ class TelloController(Drone):
         sock.bind(('0.0.0.0', 8890))
         state_string = sock.recv(1024).decode('utf-8')
         list_states = state_string.split(';')[:-1]
-        # return dict([i.split(':') for i in list_states])
-        return state_string
+        return dict([i.split(':') for i in list_states])
 
     def set_rc(self, x: int, y: int, z: int, yaw: int):
         return self.send_command(f"rc {x} {y} {z} {yaw}")
 
 
-class TelloVideoReceiver(UDPStreamReceiver):
+class TelloVideoReceiver(cv2.VideoCapture):
     def __init__(self):
-        super().__init__(11111)
+        self.address = 'udp://0.0.0.0:11111'
+        super().__init__(self.address)

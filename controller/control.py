@@ -42,6 +42,7 @@ class ManualController(Controller):
         self.video = stream
         self.in_control = True
         self.send_rc_control = False
+        self.event = None
 
         self.for_back_velocity = 0
         self.left_right_velocity = 0
@@ -52,12 +53,16 @@ class ManualController(Controller):
         self.tello.stop_stream()
         self.tello.start_stream()
 
+        if not self.video.isOpened():
+            self.video.open(self.video.address)
+
         status, frame = self.video.read()
 
         should_stop = False
         while not should_stop and self.in_control:
 
             for event in pygame.event.get():
+                self.event = event
                 if event.type == pygame.USEREVENT + 1:
                     self.update()
                 elif event.type == pygame.QUIT:
@@ -75,15 +80,16 @@ class ManualController(Controller):
 
             self.screen.fill([0, 0, 0])
 
-            text = "Battery: {}%".format(self.tello.get_state()['battery'])
+            status, frame = self.video.read()
+            text = "Battery: {}%".format(self.tello.get_state()['bat'])
             cv2.putText(frame, text, (5, 720 - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = np.rot90(frame)
             frame = np.flipud(frame)
 
-            frame = pygame.surfarray.make_surface(frame)
-            self.screen.blit(frame, (0, 0))
+            background = pygame.surfarray.make_surface(frame)
+            self.screen.blit(background, (0, 0))
             pygame.display.update()
 
             time.sleep(1 / FPS)
@@ -201,13 +207,13 @@ class MainController:
         thread.start()
 
     def check_and_switch_controllers(self):
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    self.manual_controller.in_control = not self.manual_controller.in_control
-                    self.vision_controller.in_control = not self.vision_controller.in_control
-                elif event.key == pygame.K_RETURN:
-                    self.tello.emergency()
+        while True:
+            key = cv2.waitKey(1) & 0xff
+            if key == 0:
+                self.tello.emergency()
+            elif key == 20:
+                self.manual_controller.in_control = not self.manual_controller.in_control
+                self.vision_controller.in_control = not self.vision_controller.in_control
 
     def run(self):
         self.manual_controller.run()
