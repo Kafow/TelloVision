@@ -10,7 +10,6 @@ stdv = np.array([20, 80, 80])
 def main():
     # start stream
     drone = TelloController()
-    drone.connect()
     drone.start_stream()
 
     receive = TelloVideoReceiver()

@@ -9,7 +9,8 @@ class TelloController(Drone):
     Interact simply with tello drone
     """
 
-    def __init__(self, drone_ip='192.168.10.1', drone_port=8889, local_ip='127.0.0.1', local_port=5809, command_timeout=.3):
+    def __init__(self, drone_ip='192.168.10.1', drone_port=8889, local_ip='127.0.0.1', local_port=5809,
+                 command_timeout=.3):
         self.command_timeout = command_timeout
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((local_ip, local_port))
@@ -20,7 +21,7 @@ class TelloController(Drone):
         self.receive_thread.daemon = True
         self.receive_thread.start()
 
-        if not self.connect():
+        if not self._connect():
             raise RuntimeError("Drone hasn't returned a response")
 
     def __thread_handler(self):
@@ -63,7 +64,7 @@ class TelloController(Drone):
             return False
         return False
 
-    def connect(self) -> bool:
+    def _connect(self) -> bool:
         """
         Connect to tello sdk
 
@@ -123,4 +124,3 @@ class TelloController(Drone):
 class TelloVideoReceiver(UDPStreamReceiver):
     def __init__(self):
         super().__init__(11111)
-
