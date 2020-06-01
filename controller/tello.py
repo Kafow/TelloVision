@@ -20,7 +20,7 @@ class TelloController(Drone):
         self.receive_thread.daemon = True
         self.receive_thread.start()
 
-        if not self.connect:
+        if not self.connect():
             raise RuntimeError("Drone hasn't returned a response")
 
     def __thread_handler(self):
@@ -35,11 +35,11 @@ class TelloController(Drone):
             except Exception:
                 break
 
-    def send_command(self, command: str) -> str:
+    def send_command(self, command: str) -> bool:
         """
         Send command to Tello and wait for response
         Args:
-            command (str): The command in Tello sdk style
+            command (bool): True if command succeeded, False if not
 
         Returns:
             Command Response
@@ -57,13 +57,17 @@ class TelloController(Drone):
 
         response = self.response
         self.response = None
-        return response
+        if response == str('ok'):  # TODO Check if indeed string == ok
+            return True
+        elif response == str('error'):
+            return False
+        return False
 
-    def connect(self) -> str:
+    def connect(self) -> bool:
         """
         Connect to tello sdk
 
-        Returns(str): error or ok
+        Returns(bool): True if connected, False if failed
         """
         return self.send_command("Command")
 

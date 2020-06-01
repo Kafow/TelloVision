@@ -13,7 +13,6 @@ class Classifier:
         self.labels = pickle.loads(open(labels_path, "rb").read())
         self.prob = 0.0
 
-
     def classify(self, frame):
         # Resize frame for classification
         frame = cv2.resize(frame, (96, 96)) / 255.0

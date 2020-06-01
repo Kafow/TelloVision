@@ -1,12 +1,10 @@
 import abc
-import socket
-import threading
 
 
 class Drone(abc.ABC):
 
     @abc.abstractmethod
-    def connect(self):
+    def connect(self) -> bool:
         """
         connecting the drone
 
@@ -16,7 +14,7 @@ class Drone(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def send_command(self, command: str):
+    def send_command(self, command: str) -> bool:
         """Abstract method for command sending to the drone
         Args:
             command : the command you would like to send
