@@ -49,8 +49,6 @@ class ManualController(Controller):
         self.yaw_velocity = 0
 
     def run(self):
-        self.tello.connect()
-
         self.tello.stop_stream()
         self.tello.start_stream()
 

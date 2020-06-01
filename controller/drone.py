@@ -4,7 +4,7 @@ import abc
 class Drone(abc.ABC):
 
     @abc.abstractmethod
-    def connect(self) -> bool:
+    def _connect(self) -> bool:
         """
         connecting the drone
 

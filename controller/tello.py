@@ -2,6 +2,7 @@ import socket
 import threading
 from controller.drone import Drone
 from gbvision import UDPStreamReceiver
+import time
 
 
 class TelloController(Drone):
@@ -9,8 +10,8 @@ class TelloController(Drone):
     Interact simply with tello drone
     """
 
-    def __init__(self, drone_ip='192.168.10.1', drone_port=8889, local_ip='127.0.0.1', local_port=5809,
-                 command_timeout=.3):
+    def __init__(self, drone_ip="192.168.10.1", drone_port=8889, local_ip='0.0.0.0', local_port=5809,
+                 command_timeout=3.0):
         self.command_timeout = command_timeout
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((local_ip, local_port))
@@ -20,6 +21,8 @@ class TelloController(Drone):
         self.receive_thread = threading.Thread(target=self.__thread_handler)
         self.receive_thread.daemon = True
         self.receive_thread.start()
+
+        self.error_flag = False
 
         if not self._connect():
             raise RuntimeError("Drone hasn't returned a response")
@@ -36,6 +39,9 @@ class TelloController(Drone):
             except Exception:
                 break
 
+    def _set_error_flag(self):
+        self.error_flag = not self.error_flag
+
     def send_command(self, command: str) -> bool:
         """
         Send command to Tello and wait for response
@@ -46,21 +52,21 @@ class TelloController(Drone):
             Command Response
 
         """
-        error_flag = False
-        timer = threading.Timer(self.command_timeout, error_flag)
+        self.error_flag = False
+        timer = threading.Timer(self.command_timeout, self._set_error_flag)
         self.socket.sendto(command.encode('utf-8'), self.drone_address)
 
         timer.start()
-        if self.response is None:
-            if error_flag:
+        while self.response is None:
+            if self.error_flag:
                 raise RuntimeError("command timed out")
         timer.cancel()
 
-        response = self.response
+        response = self.response.decode('utf-8')
         self.response = None
-        if response == str('ok'):  # TODO Check if indeed string == ok
+        if response == 'ok':
             return True
-        elif response == str('error'):
+        elif response == 'error':
             return False
         return False
 
@@ -70,7 +76,7 @@ class TelloController(Drone):
 
         Returns(bool): True if connected, False if failed
         """
-        return self.send_command("Command")
+        return self.send_command("command")
 
     def takeoff(self):
         return self.send_command("takeoff")
@@ -112,10 +118,10 @@ class TelloController(Drone):
     def get_state():
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8890))
-        state_string = sock.recv(1024)
+        state_string = sock.recv(1024).decode('utf-8')
         list_states = state_string.split(';')[:-1]
-        list_states[12] = list_states[12][1:]  # take care of time var prob
-        return dict([i.split(':') for i in list_states])
+        # return dict([i.split(':') for i in list_states])
+        return state_string
 
     def set_rc(self, x: int, y: int, z: int, yaw: int):
         return self.send_command(f"rc {x} {y} {z} {yaw}")
