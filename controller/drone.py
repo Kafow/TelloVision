@@ -67,11 +67,11 @@ class Drone(abc.ABC):
         return self.move("back", x)
 
     @abc.abstractmethod
-    def rotate_clockwise(self, x:int):
+    def rotate_clockwise(self, x: int):
         pass
 
     @abc.abstractmethod
-    def rotate_counter_clockwise(self, x:int):
+    def rotate_counter_clockwise(self, x: int):
         pass
 
     @abc.abstractmethod

@@ -32,17 +32,19 @@ class Controller(abc.ABC):
 
 class ManualController(Controller):
 
-    def __init__(self, tello: TelloController, stream: TelloVideoReceiver):
+    def __init__(self, tello: TelloController, stream: TelloVideoReceiver, screen):
         super().__init__()
         pygame.init()
         pygame.display.set_caption("Tello video stream")
-        self.screen = pygame.display.set_mode([960, 720])
+        self.screen = screen
 
         self.tello = tello
         self.video = stream
         self.in_control = True
         self.send_rc_control = False
-        self.event = None
+
+        self.enter_pressed = False
+        self.space_pressed = False
 
         self.for_back_velocity = 0
         self.left_right_velocity = 0
@@ -62,7 +64,6 @@ class ManualController(Controller):
         while not should_stop and self.in_control:
 
             for event in pygame.event.get():
-                self.event = event
                 if event.type == pygame.USEREVENT + 1:
                     self.update()
                 elif event.type == pygame.QUIT:
@@ -70,6 +71,10 @@ class ManualController(Controller):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         should_stop = True
+                    elif event.key == pygame.K_RETURN:
+                        self.enter_pressed = True
+                    elif event.key == pygame.K_SPACE:
+                        self.space_pressed = True
                     else:
                         self.keydown(event.key)
                 elif event.type == pygame.KEYUP:
@@ -126,7 +131,8 @@ class ManualController(Controller):
         elif key_event == pygame.K_a or key_event == pygame.K_d:  # set zero yaw velocity
             self.yaw_velocity = 0
         elif key_event == pygame.K_t:  # takeoff
-            self.tello.takeoff()
+            if not self.tello.takeoff():
+                print("[ERROR] Takeoff failed")
             self.send_rc_control = True
         elif key_event == pygame.K_l:  # land
             not self.tello.land()
@@ -135,11 +141,15 @@ class ManualController(Controller):
 
 class VisionController(Controller):
 
-    def __init__(self, tello: TelloController, video: TelloVideoReceiver):
+    def __init__(self, tello: TelloController, video: TelloVideoReceiver, screen):
         super().__init__()
         self.tello = tello
         self.video = video
         self.in_control = False
+        self.screen = screen
+
+        self.enter_pressed = False
+        self.space_pressed = False
 
         self.yaw_velocity = None
         self.left_right_velocity = None
@@ -151,18 +161,40 @@ class VisionController(Controller):
         classifier = Classifier(MODEL_PATH, LABELS_PATH)
         direction = None
         engine = None  # To be in control of which direction we need to make speed 0
+
         while not should_stop and self.in_control:
+
+            # Pygame events
+            for event in pygame.event.get():
+                if event.type == pygame.USEREVENT + 1:
+                    self.update()
+                elif event.type == pygame.QUIT:
+                    should_stop = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        should_stop = True
+                    elif event.key == pygame.K_RETURN:
+                        self.enter_pressed = True
+                    elif event.key == pygame.K_SPACE:
+                        self.space_pressed = True
+
+            self.screen.fill([0, 0, 0])
+
+            # Screen output and reading from stream
             status, frame = self.video.read()
+            text = "Battery: {}%".format(self.tello.get_state()['bat'])
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = np.rot90(frame)
             frame = np.flipud(frame)
             frame = THRESHOLD(frame)
 
+            # handle the engines so we know what was last direction
             if direction == 'up' or direction == 'down':
                 engine = 'up_down'
             elif direction == 'left' or 'right':
                 engine = 'left_right'
 
+            # Vision movement
             direction = classifier.classify(frame)
 
             if direction == 'up':
@@ -185,6 +217,13 @@ class VisionController(Controller):
                     self.up_down_velocity = 0
                 self.left_right_velocity = SPEED
 
+            # Pygame screen
+            background = pygame.surfarray.make_surface(frame)
+            self.screen.blit(background, (0, 0))
+            pygame.display.update()
+
+            time.sleep(1 / FPS)
+
             if not status:
                 break
 
@@ -203,17 +242,26 @@ class MainController:
 
         self.manual_controller = ManualController(self.tello, self.video)
         self.vision_controller = VisionController(self.tello, self.video)
+
+        self.screen = pygame.display.set_mode([960, 720])
+
         thread = threading.Thread(target=self.check_and_switch_controllers, daemon=True)
         thread.start()
 
     def check_and_switch_controllers(self):
         while True:
-            key = cv2.waitKey(1) & 0xff
-            if key == 0:
-                self.tello.emergency()
-            elif key == 20:
-                self.manual_controller.in_control = not self.manual_controller.in_control
-                self.vision_controller.in_control = not self.vision_controller.in_control
+            if self.manual_controller.in_control:
+                if self.manual_controller.space_pressed:
+                    self.manual_controller.in_control = not self.manual_controller.in_control
+                    self.vision_controller.in_control = not self.vision_controller.in_control
+                elif self.manual_controller.enter_pressed:
+                    self.tello.emergency()
+            if self.vision_controller.in_control:
+                if self.vision_controller.space_pressed:
+                    self.manual_controller.in_control = not self.manual_controller.in_control
+                    self.vision_controller.in_control = not self.vision_controller.in_control
+                elif self.vision_controller.enter_pressed:
+                    self.tello.emergency()
 
     def run(self):
         self.manual_controller.run()

@@ -1,6 +1,4 @@
 from controller.control import MainController
-import gbvision as gbv
-
 
 def main():
     controller = MainController()
