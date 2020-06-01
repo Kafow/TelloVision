@@ -130,3 +130,21 @@ class TelloVideoReceiver(cv2.VideoCapture):
     def __init__(self):
         self.address = 'udp://0.0.0.0:11111'
         super().__init__(self.address)
+
+        self.frame = None
+        self.status = False
+
+        self.thread = threading.Thread(target=self._thread_handler)
+        self.thread.start()
+
+    def read(self, image=None):
+        return self.status, self.frame
+
+    def release(self):
+        super().release()
+        del self.thread
+
+    def _thread_handler(self):
+        while True:
+            if super().isOpened():
+                self.status, self.frame = super().read()

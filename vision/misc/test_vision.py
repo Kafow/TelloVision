@@ -3,9 +3,7 @@ from controller.tello import TelloVideoReceiver
 import imutils
 import cv2
 from vision.CNN.clasifier import Classifier
-
-MODEL_PATH = ''
-LABELS_PATH = ''
+from constants import MODEL_PATH, LABELS_PATH
 
 
 receiver = TelloVideoReceiver()

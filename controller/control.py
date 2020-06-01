@@ -101,6 +101,7 @@ class ManualController(Controller):
         if self.in_control:
             self.tello.land()
             self.tello.stop_stream()
+            self.video.release()
 
     def keydown(self, key_event):
         if key_event == pygame.K_UP:  # set forward velocity
