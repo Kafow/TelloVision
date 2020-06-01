@@ -240,10 +240,10 @@ class MainController:
         self.tello = TelloController()
         self.video = TelloVideoReceiver()
 
-        self.manual_controller = ManualController(self.tello, self.video)
-        self.vision_controller = VisionController(self.tello, self.video)
-
         self.screen = pygame.display.set_mode([960, 720])
+
+        self.manual_controller = ManualController(self.tello, self.video, self.screen)
+        self.vision_controller = VisionController(self.tello, self.video, self.screen)
 
         thread = threading.Thread(target=self.check_and_switch_controllers, daemon=True)
         thread.start()

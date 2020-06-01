@@ -11,7 +11,7 @@ class TelloController(Drone):
     """
 
     def __init__(self, drone_ip="192.168.10.1", drone_port=8889, local_ip='0.0.0.0', local_port=5809,
-                 command_timeout=5):
+                 command_timeout=8  ):
         self.command_timeout = command_timeout
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((local_ip, local_port))
