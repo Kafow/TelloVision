@@ -7,7 +7,7 @@ def process_image(frame):
     grayscaled = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # th = cv2.adaptiveThreshold(grayscaled, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 205, 1)
     blur = cv2.GaussianBlur(grayscaled, (5, 5), 0)
-    th = cv2.threshold(blur, 120, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    th = cv2.threshold(blur, 120, 255, cv2.THRESH_BINARY)[1]
     th = np.bitwise_not(th)
     pipe = gbv.EMPTY_PIPELINE + gbv.find_contours + gbv.contours_to_polygons + gbv.sort_polygons
     list_contours = pipe(th)

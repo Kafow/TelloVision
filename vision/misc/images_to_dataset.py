@@ -7,6 +7,7 @@ import random
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.preprocessing.image import img_to_array
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 
 """
 Im not sure if i wanna use it because after I programmed this I found out Keras has 
@@ -34,20 +35,26 @@ class ArrowsDataset:
         """
         data = []
         labels = []
-
-        print("Loading images...")
+        print("[INFO] Loading images...")
         images_paths = sorted(list(list_images(self.path)))
+
+        loop = tqdm(total=len(images_paths), position=0, leave=False)
+
         random.seed(69)
         random.shuffle(images_paths)
 
-        for imagePath in images_paths:
+        for i, imagePath in enumerate(images_paths):
             img = cv2.imread(imagePath)
             img = cv2.resize(img, self.img_dims)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = img_to_array(img)
             data.append(img)
 
             label = imagePath.split(os.path.sep)[-2]  # get the label according to folder name
             labels.append(label)
+
+            loop.set_description("loading...".format(i))
+            loop.update(1)
 
         # Make the images range from 0 to 1
         data = np.array(data, dtype=float) / 255.0
@@ -64,6 +71,7 @@ class ArrowsDataset:
         self.lb = lb
 
         x_train, x_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=69)
+        print("[INFO] Finished loading images")
 
         return (x_train, y_train), (x_test, y_test)
 

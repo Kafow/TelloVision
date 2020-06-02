@@ -1,25 +1,24 @@
-from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Activation, Dropout
+from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Activation, Dropout, BatchNormalization
 from tensorflow.keras.models import Sequential
 
 
 class CNN:
     @staticmethod
-    def build(batch_size, width, height, depth, num_of_outputs):
+    def build(width, height, depth, num_of_outputs):
         """
         Defines custom made CNN that aims to classify between 4 arrows (up, down, left, right)
         Args:
-            batch_size: Batch size
             width: Width of img
             height: Height of image
             depth: How many depth does the image have (1 for greyscale, 3 for RGB)
             num_of_outputs: how many outputs there is
         """
-        input_shape = (batch_size, width, height, depth)
+        input_shape = (width, height, depth)
 
         model = Sequential()
 
         # First set of layers (CONV => relu => MaxPool)
-        model.add(Conv2D(32, (3, 3), batch_input_shape=input_shape))
+        model.add(Conv2D(32, (3, 3), input_shape=input_shape))
         model.add(Activation('relu'))
         model.add(MaxPool2D(pool_size=(3, 3)))
         model.add(Dropout(0.25))  # Dropout forth of the neurons
@@ -35,7 +34,7 @@ class CNN:
         # Flatten the model
         model.add(Flatten())
         model.add(Activation("relu"))
-        #model.add(Dropout(0.5))
+        model.add(Dropout(0.5))
 
         # Final output and applying softmax filter
         model.add(Dense(num_of_outputs))

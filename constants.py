@@ -7,5 +7,11 @@ MODEL_PATH = os.path.abspath('C:\\Users\\Ofek\\Desktop\\coding\\TelloVision')
 LABELS_PATH = os.path.abspath('C:\\Users\\Ofek\\Desktop\\coding\\TelloVision\\label.pickle')
 DATASET_PATH = os.path.abspath('dataset')
 
+IMAGE_DIMS = (64, 64)
+BATCH_SIZE = 32
+LR = 1e-3
+EPOCHS = 10
+LOSS = "categorical_crossentropy"
+
 SPEED = 30
 FPS = 120

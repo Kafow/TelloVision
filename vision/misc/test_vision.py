@@ -7,10 +7,9 @@ from vision.vision import process_image
 from vision.CNN.clasifier import Classifier
 from constants import MODEL_PATH, LABELS_PATH
 
-# tello = TelloController()
-# tello.start_stream()
-# receiver = TelloVideoReceiver()
-receiver = cv2.VideoCapture(0)
+tello = TelloController()
+tello.start_stream()
+receiver = TelloVideoReceiver()
 time.sleep(5)
 classifier = Classifier(MODEL_PATH, LABELS_PATH)
 
@@ -25,4 +24,5 @@ while True:
     cv2.putText(frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
                 0.7, (0, 255, 0), 2)
     cv2.imshow("Output", frame)
+    cv2.imshow("cam", copy_frame)
     cv2.waitKey(1)
