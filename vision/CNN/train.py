@@ -23,7 +23,7 @@ dataset = ArrowsDataset(args.dataset, IMAGE_DIMS)
 (x_train, y_train), (x_test, y_test) = dataset.load_data()
 
 # Init Model and compile
-model = CNN().build(IMAGE_DIMS[0], IMAGE_DIMS[1], 1, 4)
+model = CNN().build(BATCH_SIZE, IMAGE_DIMS[0], IMAGE_DIMS[1], 1, 4)
 opt = Adam(learning_rate=LR)
 model.compile(loss=LOSS, optimizer=opt, metrics=['accuracy'])
 
@@ -35,7 +35,7 @@ try:
     with open(args.label, "wb") as f:
         print("[INFO] Saving labels bin...")
         f.write(pickle.dumps(dataset.lb))
-        f .close()
+        f.close()
 except Exception as e:
     print(f"[ERROR] Saving labels failed: {e}")
 model.save(args.model)

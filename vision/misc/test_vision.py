@@ -1,17 +1,22 @@
 from tensorflow.keras.models import load_model
-from controller.tello import TelloVideoReceiver
+from controller.tello import TelloVideoReceiver, TelloController
+import time
 import imutils
 import cv2
+from vision.vision import process_image
 from vision.CNN.clasifier import Classifier
 from constants import MODEL_PATH, LABELS_PATH
 
-
-receiver = TelloVideoReceiver()
+# tello = TelloController()
+# tello.start_stream()
+# receiver = TelloVideoReceiver()
+receiver = cv2.VideoCapture(0)
+time.sleep(5)
 classifier = Classifier(MODEL_PATH, LABELS_PATH)
 
 while True:
     status, frame = receiver.read()
-    copy_frame = frame.copy()
+    copy_frame = process_image(frame)
     label = classifier.classify(copy_frame)
 
     # build the label and draw the label on the image

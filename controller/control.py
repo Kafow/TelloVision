@@ -6,28 +6,14 @@ import numpy as np
 import time
 import threading
 import abc
-from constants import THRESHOLD, MODEL_PATH, LABELS_PATH, FPS, SPEED
+from constants import MODEL_PATH, LABELS_PATH, FPS, SPEED
+from vision.vision import process_image
 
 
 class Controller(abc.ABC):
-    def __init__(self):
-        self.yaw_velocity = None
-        self.for_back_velocity = None
-        self.up_down_velocity = None
-        self.tello = None
-        self.in_control = None
-        self.send_rc_control = None
-        self.left_right_velocity = None
-
     @abc.abstractmethod
     def run(self):
         pass
-
-    def update(self):
-        if self.in_control:  # If in control
-            if self.send_rc_control:
-                self.tello.set_rc(self.left_right_velocity, self.for_back_velocity,
-                                  self.up_down_velocity, self.yaw_velocity)
 
 
 class ManualController(Controller):
@@ -51,12 +37,15 @@ class ManualController(Controller):
         self.up_down_velocity = 0
         self.yaw_velocity = 0
 
+        pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // FPS)  # Update Timer
+
     def run(self):
         self.tello.stop_stream()
         self.tello.start_stream()
 
         if not self.video.isOpened():
-            self.video.open(self.video.address)
+            if not self.video.open(self.video.address):
+                return False
 
         status, frame = self.video.read()
 
@@ -86,7 +75,7 @@ class ManualController(Controller):
             self.screen.fill([0, 0, 0])
 
             status, frame = self.video.read()
-            text = "Battery: {}%".format(self.tello.get_state()['bat'])
+            text = "Battery: {}%".format(self.tello.state['bat'])
             cv2.putText(frame, text, (5, 720 - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -102,6 +91,12 @@ class ManualController(Controller):
             self.tello.land()
             self.tello.stop_stream()
             self.video.release()
+
+    def update(self):
+        if self.in_control:  # If in control
+            if self.send_rc_control:
+                self.tello.set_rc(self.left_right_velocity, self.for_back_velocity,
+                                  self.up_down_velocity, self.yaw_velocity)
 
     def keydown(self, key_event):
         if key_event == pygame.K_UP:  # set forward velocity
@@ -134,14 +129,14 @@ class ManualController(Controller):
         elif key_event == pygame.K_t:  # takeoff
             if not self.tello.takeoff():
                 print("[ERROR] Takeoff failed")
-            self.send_rc_control = True
+            else:
+                self.send_rc_control = True
         elif key_event == pygame.K_l:  # land
             not self.tello.land()
             self.send_rc_control = False
 
 
 class VisionController(Controller):
-
     def __init__(self, tello: TelloController, video: TelloVideoReceiver, screen):
         super().__init__()
         self.tello = tello
@@ -187,7 +182,7 @@ class VisionController(Controller):
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = np.rot90(frame)
             frame = np.flipud(frame)
-            frame = THRESHOLD(frame)
+            frame = process_image(frame)
 
             # handle the engines so we know what was last direction
             if direction == 'up' or direction == 'down':
@@ -233,7 +228,9 @@ class VisionController(Controller):
             self.tello.stop_stream()
 
     def update(self):
-        pass
+        if self.in_control:  # If in control
+            self.tello.set_rc(self.left_right_velocity, self.for_back_velocity,
+                              self.up_down_velocity, self.yaw_velocity)
 
 
 class MainController:
@@ -266,4 +263,4 @@ class MainController:
 
     def run(self):
         self.manual_controller.run()
-        self.vision_controller.run()
+        # self.vision_controller.run()

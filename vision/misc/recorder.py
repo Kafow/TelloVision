@@ -2,7 +2,9 @@ import gbvision as gbv
 from constants import DATASET_PATH, FPS
 from controller import TelloVideoReceiver,TelloController
 import threading
+import cv2
 import os
+import time
 
 
 class Recorder:
@@ -18,6 +20,7 @@ class Recorder:
         tello = TelloController()
         tello.start_stream()
         video = TelloVideoReceiver()
+        time.sleep(5)
         timer = threading.Timer(self.video_time, self.change_timer_status)
         while True:
             if video.isOpened():
@@ -26,11 +29,13 @@ class Recorder:
         while True:
             result, frame = video.read()
             if result and not self.is_timer_over:
+                cv2.imshow('title', frame)
+                cv2.waitKey(1)
                 self.recorder.record(frame)
             if self.is_timer_over:
                 video.release()
                 break
 
 
-recorder = Recorder(os.path.join(DATASET_PATH, 'video.avi'), FPS, 15)
+recorder = Recorder(os.path.join(DATASET_PATH, 'left.avi'), FPS, 15)
 recorder.run()

@@ -1,5 +1,6 @@
 from controller.control import MainController
 
+
 def main():
     controller = MainController()
     controller.run()

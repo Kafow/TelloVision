@@ -14,13 +14,15 @@ class Drone(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def send_command(self, command: str) -> bool:
+    def send_command(self, command: str, timeout: float) -> bool:
         """Abstract method for command sending to the drone
         Args:
             command : the command you would like to send
+            timeout : Command timeout
 
         Returns:
             Response from the drone
+
 
         """
         pass
