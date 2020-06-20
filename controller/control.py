@@ -219,7 +219,7 @@ class VisionController(Controller):
                 self.left_right_velocity = 0
                 self.up_down_velocity = 0
 
-            background = pygame.surfarray.make_surface(copy_frame)
+            background = pygame.surfarray.make_surface(frame)
             self.screen.blit(background, (0, 0))
             pygame.display.update()
 
