@@ -9,6 +9,15 @@ from constants import MODEL_PATH, LABELS_PATH, FPS, SPEED
 from vision.vision import process_image
 
 
+def set_interval(func, sec):
+    def func_wrapper():
+        set_interval(func, sec)
+        func()
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t
+
+
 class MainController:
     def __init__(self):
         self.tello = TelloController()
@@ -57,87 +66,87 @@ class MainController:
                 return False
 
         status, frame = self.video.read()
+        set_interval(self.update, ((1000 // FPS) / 1000))
         #################### Manual Control ####################
-        while not self.should_stop and not self.is_vision_control:
-            threading.Timer(1000 // FPS, self.update)
-            if not status:
-                break
-            status, frame = self.video.read()
-            text = "Battery: {}%".format(self.tello.state['bat'])
-            cv2.putText(frame, text, (5, 720 - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = np.rot90(frame)
-            frame = np.flipud(frame)
+        while True:
+            while not self.should_stop and not self.is_vision_control:
+                if not status:
+                    break
+                status, frame = self.video.read()
+                text = "Battery: {}%".format(self.tello.state['bat'])
+                cv2.putText(frame, text, (5, 720 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-            cv2.imshow('Video', frame)
-            cv2.waitKey(1 / FPS)
+                cv2.imshow('Video', frame)
+                cv2.waitKey(1)
 
-        #################### Vision Control ####################
-        classifier = self.classifier
-        direction = None
-        engine = None  # To be in control of which direction we need to make speed 0
+            #################### Vision Control ####################
+            classifier = self.classifier
+            direction = None
+            engine = None  # To be in control of which direction we need to make speed 0
 
-        while not self.should_stop and self.is_vision_control:
-            threading.Timer(1000 // FPS, self.update)
+            while not self.should_stop and self.is_vision_control:
 
-            # Screen output and reading from stream
-            status, frame = self.video.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = np.rot90(frame)
-            frame = np.flipud(frame)
-            copy_frame = frame.copy()
-            frame = process_image(frame)
+                # Screen output and reading from stream
+                status, frame = self.video.read()
+                copy_frame = frame.copy()
+                frame = process_image(frame)
 
-            text = "Battery: {}%".format(self.tello.state['bat'])
-            cv2.putText(copy_frame, text, (5, 720 - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            label = "{}: {:.2f}%".format(direction, classifier.prob * 100)
-            cv2.putText(copy_frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
-                        0.7, (0, 255, 0), 2)
+                text = "Battery: {}%".format(self.tello.state['bat'])
+                cv2.putText(copy_frame, text, (5, 720 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                label = "{}: {:.2f}%".format(direction, classifier.prob * 100)
+                cv2.putText(copy_frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7, (0, 255, 0), 2)
 
-            # handle the engines so we know what was last direction
-            if direction == 'up' or direction == 'down':
-                engine = 'up_down'
-            elif direction == 'left' or 'right':
-                engine = 'left_right'
+                # handle the engines so we know what was last direction
+                if direction == 'up' or direction == 'down':
+                    engine = 'up_down'
+                elif direction == 'left' or 'right':
+                    engine = 'left_right'
 
-            # Vision movement
-            direction = classifier.classify(frame) if classifier.prob > 70.0 else 'background'
+                # Vision movement
+                direction = classifier.classify(frame)
+                #direction = classifier.classify(frame) if classifier.prob > 40.0 else 'background'
 
-            if direction == 'up':
-                if engine == 'left_right':
+                if direction == 'up':
+                    if engine == 'left_right':
+                        self.left_right_velocity = 0
+                    self.up_down_velocity = SPEED
+                    print("UP")
+
+                elif direction == 'down':
+                    if engine == 'left_right':
+                        self.left_right_velocity = 0
+                    self.up_down_velocity = -SPEED
+                    print("DOWN")
+
+                elif direction == 'left':
+                    if engine == 'up_down':
+                        self.up_down_velocity = 0
+                    self.left_right_velocity = -SPEED
+                    print("LEFT")
+
+                elif direction == 'right':
+                    if engine == 'up_down':
+                        self.up_down_velocity = 0
+                    self.left_right_velocity = SPEED
+                    print("RIGHT")
+
+                elif direction == 'random':
                     self.left_right_velocity = 0
-                self.up_down_velocity = SPEED
-                print("UP")
-
-            elif direction == 'down':
-                if engine == 'left_right':
-                    self.left_right_velocity = 0
-                self.up_down_velocity = -SPEED
-                print("DOWN")
-
-            elif direction == 'left':
-                if engine == 'up_down':
                     self.up_down_velocity = 0
-                self.left_right_velocity = -SPEED
-                print("LEFT")
 
-            elif direction == 'right':
-                if engine == 'up_down':
-                    self.up_down_velocity = 0
-                self.left_right_velocity = SPEED
-                print("RIGHT")
+                cv2.imshow('After vision', copy_frame)
+                cv2.waitKey(1)
 
-            elif direction == 'background':
-                self.left_right_velocity = 0
-                self.up_down_velocity = 0
-
-            cv2.imshow('After vision', copy_frame)
-            cv2.waitKey(1 / FPS)
-
-            if not status:
+                if not status:
+                    break
+            if self.should_stop:
                 break
+        self.tello.land()
+        self.tello.stop_stream()
+        self.video.release()
 
     def update(self):
         if self.send_rc_control:
@@ -145,13 +154,13 @@ class MainController:
                               self.up_down_velocity, self.yaw_velocity)
 
     def keydown(self, key):
-        if key == keyboard.KeyCode.from_vk(26):  # set forward velocity
+        if key == keyboard.Key.up:  # set forward velocity
             self.for_back_velocity = SPEED
-        elif key == keyboard.KeyCode.from_vk(28):  # set backward velocity
+        elif key == keyboard.Key.down:  # set backward velocity
             self.for_back_velocity = -SPEED
-        elif key == keyboard.KeyCode.from_vk(25):  # set left velocity
+        elif key == keyboard.Key.left:  # set left velocity
             self.left_right_velocity = -SPEED
-        elif key == keyboard.KeyCode.from_vk(27):  # set right velocity
+        elif key == keyboard.Key.right:  # set right velocity
             self.left_right_velocity = SPEED
         elif key == keyboard.KeyCode.from_char('w'):  # set up velocity
             self.up_down_velocity = SPEED
@@ -169,10 +178,9 @@ class MainController:
             self.is_vision_control = not self.is_vision_control  # Switch between vision and manual controller
 
     def keyup(self, key):
-        if key == keyboard.KeyCode.from_vk(26) or key == keyboard.KeyCode.from_vk(
-                28):  # set zero forward/backward velocity
+        if key == keyboard.Key.down or key == keyboard.Key.up:  # set zero forward/backward velocity
             self.for_back_velocity = 0
-        elif key == keyboard.KeyCode.from_vk(25) or key == keyboard.KeyCode.from_vk(27):  # set zero left/right velocity
+        elif key == keyboard.Key.right or key == keyboard.Key.left:  # set zero left/right velocity
             self.left_right_velocity = 0
         elif key == keyboard.KeyCode.from_char('w') or key == keyboard.KeyCode.from_char(
                 's'):  # set zero up/down velocity

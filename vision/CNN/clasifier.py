@@ -14,7 +14,7 @@ class Classifier:
         self.model = load_model(model_path)
         self.labels = pickle.loads(open(labels_path, "rb").read())
         self.prob = 0.0
-        self.deque = deque(maxlen=100)
+        self.deque = deque(maxlen=50)
 
     def classify(self, frame):
         # Resize frame for classification
