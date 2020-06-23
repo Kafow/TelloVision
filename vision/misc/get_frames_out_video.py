@@ -2,7 +2,7 @@ import cv2
 import argparse
 import os
 # from constants import THRESHOLD
-from vision.vision import process_image
+from vision.vision import process_image_gaussian
 
 
 def get_frames_out(video_path, output_path):
@@ -13,7 +13,7 @@ def get_frames_out(video_path, output_path):
         # extract the frame and apply filter
         if ret is True:
             # Apply contours filter
-            frame = process_image(frame)
+            frame = process_image_gaussian(frame)
 
             cv2.imwrite(f"{output_path}\\{i}.jpg", frame)
         else:

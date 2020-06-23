@@ -6,7 +6,7 @@ import numpy as np
 import time
 import threading
 from constants import MODEL_PATH, LABELS_PATH, FPS, SPEED
-from vision.vision import process_image
+from vision.vision import process_image_gaussian
 
 
 def set_interval(func, sec):
@@ -90,7 +90,7 @@ class MainController:
                 # Screen output and reading from stream
                 status, frame = self.video.read()
                 copy_frame = frame.copy()
-                frame = process_image(frame)
+                frame = process_image_gaussian(frame)
 
                 text = "Battery: {}%".format(self.tello.state['bat'])
                 cv2.putText(copy_frame, text, (5, 720 - 5),

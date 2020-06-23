@@ -7,7 +7,7 @@ import time
 import threading
 import abc
 from constants import MODEL_PATH, LABELS_PATH, FPS, SPEED
-from vision.vision import process_image
+from vision.vision import process_image_gaussian
 
 
 class Controller(abc.ABC):
@@ -173,7 +173,7 @@ class VisionController(Controller):
             frame = np.rot90(frame)
             frame = np.flipud(frame)
             copy_frame = frame.copy()
-            frame = process_image(frame)
+            frame = process_image_gaussian(frame)
 
             text = "Battery: {}%".format(self.tello.state['bat'])
             cv2.putText(copy_frame, text, (5, 720 - 5),
