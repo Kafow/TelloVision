@@ -1,6 +1,6 @@
 import gbvision as gbv
 from constants import DATASET_PATH, FPS
-from controller import TelloVideoReceiver,TelloController
+from controller import TelloVideoReceiver, TelloController
 import threading
 import cv2
 import os

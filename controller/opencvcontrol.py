@@ -2,7 +2,6 @@ from pynput import keyboard
 from controller.tello import TelloVideoReceiver, TelloController
 from vision.CNN.clasifier import Classifier
 import cv2
-import numpy as np
 import time
 import threading
 from constants import MODEL_PATH, LABELS_PATH, FPS, SPEED

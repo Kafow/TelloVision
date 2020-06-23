@@ -2,6 +2,7 @@ import socket
 import threading
 from controller.drone import Drone
 import cv2
+from typing import Dict
 import time
 
 
@@ -84,7 +85,6 @@ class TelloController(Drone):
         """
         self.socket.sendto(command.encode('utf-8'), self.drone_address)
 
-
     def _connect(self) -> bool:
         """
         Connect to tello sdk
@@ -130,6 +130,10 @@ class TelloController(Drone):
         return self.send_command(f"flip {direction}", self.control_timeout)
 
     def get_state(self):
+        """
+        Get tello state from tello and place it as a dict in local var state
+
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 8890))
         while True:
@@ -149,14 +153,11 @@ class TelloVideoReceiver(cv2.VideoCapture):
         self.frame = None
         self.status = False
 
-        self.thread = threading.Thread(target=self._thread_handler, daemon=True)
+        self.thread = threading.Thread(target=self._thread_handler, daemon=True)  # start new thread for video receiving
         self.thread.start()
 
-    def read(self, image=None):
+    def read(self, image=None):  # reimplementing read function so it would not be accessed by thread
         return self.status, self.frame
-
-    def release(self):
-        super().release()
 
     def _thread_handler(self):
         while True:
