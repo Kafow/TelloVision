@@ -1,9 +1,7 @@
-from controller.control import MainController
-import pygame
+from controller.opencvcontrol import MainController
 
 
 def main():
-    pygame.init()
     controller = MainController()
     controller.run()
 
