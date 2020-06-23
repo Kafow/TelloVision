@@ -3,7 +3,7 @@ from controller.tello import TelloVideoReceiver, TelloController
 import time
 import imutils
 import cv2
-from vision.vision import process_image
+from vision.vision import process_image_gaussian, process_image_gaussian_adaptive, process_image_color
 from vision.CNN.clasifier import Classifier
 from constants import MODEL_PATH, LABELS_PATH
 
@@ -15,7 +15,7 @@ classifier = Classifier(MODEL_PATH, LABELS_PATH)
 
 while True:
     status, frame = receiver.read()
-    copy_frame = process_image(frame)
+    copy_frame = process_image_gaussian(frame)
     label = classifier.classify(copy_frame)
 
     # build the label and draw the label on the image

@@ -4,7 +4,7 @@ from constants import THRESHOLD
 import gbvision as gbv
 from controller.tello import TelloVideoReceiver, TelloController
 
-stdv = np.array([10, 100, 100])
+stdv = np.array([20, 200, 200])
 
 
 def main():
@@ -18,10 +18,10 @@ def main():
         k = window.last_key_pressed
         if k == 'r':
             bbox = cv2.selectROI('feed', frame)
-            thr = gbv.EMPTY_PIPELINE + THRESHOLD \
+            thr1 = gbv.median_threshold(frame, stdv, bbox, gbv.ColorThreshold.THRESH_TYPE_HSV)
+            thr = gbv.EMPTY_PIPELINE + thr1 \
                   + gbv.Dilate(6) + gbv.Erode(2) + gbv.find_contours + gbv.contours_to_polygons + gbv.sort_polygons
-            thr2 = gbv.EMPTY_PIPELINE + THRESHOLD + gbv.Dilate(6) + gbv.Erode(2)
-            #thr =gbv.median_threshold(frame, stdv, bbox, gbv.ColorThreshold.THRESH_TYPE_HSV)
+            thr2 = gbv.EMPTY_PIPELINE + thr1
             break
     cv2.destroyAllWindows()
 
