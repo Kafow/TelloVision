@@ -22,12 +22,15 @@ def get_frames_out(video_path, output_path):
 
 
 if __name__ == '__main__':
+    directions = ['up', 'down', 'right', 'left', 'random']
+    for direction in directions:
+        get_frames_out(os.path.join(os.getcwd(), f'dataset\\{direction}.avi'), os.path.join(os.getcwd(), f'dataset\\{direction}'))
     # Argument parser
     parser = argparse.ArgumentParser()
-    parser.add_argument("file", help="The path for the file")
-    parser.add_argument("-o", "--output", type=str, help="The output directory for the dataset")
-    args = parser.parse_args()
-
-    output_path = os.path.join(os.getcwd(), args.output)
-    file_path = os.path.join(os.getcwd(), args.file)
-    get_frames_out(file_path, output_path)
+    # parser.add_argument("file", help="The path for the file")
+    # parser.add_argument("-o", "--output", type=str, help="The output directory for the dataset")
+    # args = parser.parse_args()
+    #
+    # output_path = os.path.join(os.getcwd(), args.output)
+    # file_path = os.path.join(os.getcwd(), args.file)
+    # get_frames_out(file_path, output_path)

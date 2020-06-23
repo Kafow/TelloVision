@@ -11,18 +11,18 @@ tello = TelloController()
 tello.start_stream()
 receiver = TelloVideoReceiver()
 time.sleep(5)
-#classifier = Classifier(MODEL_PATH, LABELS_PATH)
+classifier = Classifier(MODEL_PATH, LABELS_PATH)
 
 while True:
     status, frame = receiver.read()
     copy_frame = process_image_gaussian(frame)
-    #label = classifier.classify(copy_frame)
+    label = classifier.classify(copy_frame)
 
     # build the label and draw the label on the image
-    # label = "{}: {:.2f}%".format(label, classifier.prob * 100)
+    label = "{}: {:.2f}%".format(label, classifier.prob * 100)
     frame = imutils.resize(frame, width=400)
-    # cv2.putText(frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
-    #             0.7, (0, 255, 0), 2)
+    cv2.putText(frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
+                0.7, (0, 255, 0), 2)
     cv2.imshow("Output", frame)
     cv2.imshow("cam", copy_frame)
     cv2.waitKey(1)
