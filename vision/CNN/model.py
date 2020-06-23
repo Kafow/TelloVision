@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Activation, Dropout
+from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Activation, Dropout, BatchNormalization
 from tensorflow.keras.models import Sequential
 
 
@@ -34,7 +34,7 @@ class CNN:
         # Flatten the model
         model.add(Flatten())
         model.add(Activation("relu"))
-        #model.add(Dropout(0.5))
+        model.add(Dropout(0.5))
 
         # Final output and applying softmax filter
         model.add(Dense(num_of_outputs))

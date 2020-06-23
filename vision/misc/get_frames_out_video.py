@@ -1,8 +1,8 @@
 import cv2
-import gbvision as gbv
 import argparse
 import os
-from constants import THRESHOLD
+# from constants import THRESHOLD
+from vision.vision import process_image
 
 
 def get_frames_out(video_path, output_path):
@@ -10,12 +10,11 @@ def get_frames_out(video_path, output_path):
     i = 0
     while cap.isOpened():
         ret, frame = cap.read()
-
-        # Apply binary filter
-        frame = THRESHOLD(frame)
-
-        # extract the frame after applying filter
+        # extract the frame and apply filter
         if ret is True:
+            # Apply contours filter
+            frame = process_image(frame)
+
             cv2.imwrite(f"{output_path}\\{i}.jpg", frame)
         else:
             cap.release()

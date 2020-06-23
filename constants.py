@@ -1,10 +1,17 @@
 from gbvision import ColorThreshold
 import os
 
-THRESHOLD = ColorThreshold()
+THRESHOLD = ColorThreshold([[169, 189], [84, 255], [42, 242]], 'HSV')
 
-MODEL_PATH = os.path.abspath('model.h5')
-LABELS_PATH = os.path.abspath('label.pickle')
+MODEL_PATH = os.path.abspath('C:\\Users\\Ofek\\Desktop\\coding\\TelloVision')
+LABELS_PATH = os.path.abspath('C:\\Users\\Ofek\\Desktop\\coding\\TelloVision\\label.pickle')
+DATASET_PATH = os.path.abspath('dataset')
+
+IMAGE_DIMS = (64, 64)
+BATCH_SIZE = 32
+LR = 1e-3
+EPOCHS = 10
+LOSS = "categorical_crossentropy"
 
 SPEED = 30
 FPS = 120
