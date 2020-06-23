@@ -46,10 +46,10 @@ class TelloController(Drone):
         """
         Send command to Tello and wait for response
         Args:
-            command (bool): True if command succeeded, False if not
+           command (str): Command we need to send
 
         Returns:
-            Command Response
+             (bool): True if command succeeded, False if not
 
         """
         self.error_flag = False
