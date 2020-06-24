@@ -13,5 +13,6 @@ LR = 1e-3
 EPOCHS = 10
 LOSS = "categorical_crossentropy"
 
-SPEED = 28
+HORIZONTAL_SPEED = 35
+VERTICAL_SPEED = 28
 FPS = 120

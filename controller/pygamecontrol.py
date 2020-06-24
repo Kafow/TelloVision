@@ -6,7 +6,7 @@ import numpy as np
 import time
 import threading
 import abc
-from constants import MODEL_PATH, LABELS_PATH, FPS, SPEED
+from constants import MODEL_PATH, LABELS_PATH, FPS, HORIZONTAL_SPEED
 from vision.vision import process_image_gaussian
 
 
@@ -95,21 +95,21 @@ class ManualController(Controller):
 
     def keydown(self, key_event):
         if key_event == pygame.K_UP:  # set forward velocity
-            self.for_back_velocity = SPEED
+            self.for_back_velocity = HORIZONTAL_SPEED
         elif key_event == pygame.K_DOWN:  # set backward velocity
-            self.for_back_velocity = -SPEED
+            self.for_back_velocity = -HORIZONTAL_SPEED
         elif key_event == pygame.K_LEFT:  # set left velocity
-            self.left_right_velocity = -SPEED
+            self.left_right_velocity = -HORIZONTAL_SPEED
         elif key_event == pygame.K_RIGHT:  # set right velocity
-            self.left_right_velocity = SPEED
+            self.left_right_velocity = HORIZONTAL_SPEED
         elif key_event == pygame.K_w:  # set up velocity
-            self.up_down_velocity = SPEED
+            self.up_down_velocity = HORIZONTAL_SPEED
         elif key_event == pygame.K_s:  # set down velocity
-            self.up_down_velocity = -SPEED
+            self.up_down_velocity = -HORIZONTAL_SPEED
         elif key_event == pygame.K_a:  # set yaw counter clockwise velocity
-            self.yaw_velocity = -SPEED
+            self.yaw_velocity = -HORIZONTAL_SPEED
         elif key_event == pygame.K_d:  # set yaw clockwise velocity
-            self.yaw_velocity = SPEED
+            self.yaw_velocity = HORIZONTAL_SPEED
 
     def keyup(self, key_event):
 
@@ -194,25 +194,25 @@ class VisionController(Controller):
             if direction == 'up':
                 if engine == 'left_right':
                     self.left_right_velocity = 0
-                self.up_down_velocity = SPEED
+                self.up_down_velocity = HORIZONTAL_SPEED
                 print("UP")
 
             elif direction == 'down':
                 if engine == 'left_right':
                     self.left_right_velocity = 0
-                self.up_down_velocity = -SPEED
+                self.up_down_velocity = -HORIZONTAL_SPEED
                 print("DOWN")
 
             elif direction == 'left':
                 if engine == 'up_down':
                     self.up_down_velocity = 0
-                self.left_right_velocity = -SPEED
+                self.left_right_velocity = -HORIZONTAL_SPEED
                 print("LEFT")
 
             elif direction == 'right':
                 if engine == 'up_down':
                     self.up_down_velocity = 0
-                self.left_right_velocity = SPEED
+                self.left_right_velocity = HORIZONTAL_SPEED
                 print("RIGHT")
 
             elif direction == 'background':

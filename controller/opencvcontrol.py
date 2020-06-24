@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import time
 import threading
-from constants import MODEL_PATH, LABELS_PATH, FPS, SPEED
+from constants import MODEL_PATH, LABELS_PATH, FPS, HORIZONTAL_SPEED, VERTICAL_SPEED
 from vision.vision import process_image_gaussian
 
 
@@ -107,30 +107,30 @@ class MainController:
 
                 # Vision movement
                 direction = classifier.classify(frame)
-                #direction = classifier.classify(frame) if classifier.prob > 40.0 else 'background'
+                # direction = classifier.classify(frame) if classifier.prob > 40.0 else 'random'
 
                 if direction == 'up':
                     if engine == 'left_right':
                         self.left_right_velocity = 0
-                    self.up_down_velocity = SPEED
+                    self.up_down_velocity = HORIZONTAL_SPEED
                     print("UP")
 
                 elif direction == 'down':
                     if engine == 'left_right':
                         self.left_right_velocity = 0
-                    self.up_down_velocity = -SPEED
+                    self.up_down_velocity = -HORIZONTAL_SPEED
                     print("DOWN")
 
                 elif direction == 'left':
                     if engine == 'up_down':
                         self.up_down_velocity = 0
-                    self.left_right_velocity = -SPEED
+                    self.left_right_velocity = -VERTICAL_SPEED
                     print("LEFT")
 
                 elif direction == 'right':
                     if engine == 'up_down':
                         self.up_down_velocity = 0
-                    self.left_right_velocity = SPEED
+                    self.left_right_velocity = VERTICAL_SPEED
                     print("RIGHT")
 
                 elif direction == 'random':
@@ -155,21 +155,21 @@ class MainController:
 
     def keydown(self, key):
         if key == keyboard.Key.up:  # set forward velocity
-            self.for_back_velocity = SPEED
+            self.for_back_velocity = HORIZONTAL_SPEED
         elif key == keyboard.Key.down:  # set backward velocity
-            self.for_back_velocity = -SPEED
+            self.for_back_velocity = -HORIZONTAL_SPEED
         elif key == keyboard.Key.left:  # set left velocity
-            self.left_right_velocity = -SPEED
+            self.left_right_velocity = -VERTICAL_SPEED
         elif key == keyboard.Key.right:  # set right velocity
-            self.left_right_velocity = SPEED
+            self.left_right_velocity = VERTICAL_SPEED
         elif key == keyboard.KeyCode.from_char('w'):  # set up velocity
-            self.up_down_velocity = SPEED
+            self.up_down_velocity = HORIZONTAL_SPEED
         elif key == keyboard.KeyCode.from_char('s'):  # set down velocity
-            self.up_down_velocity = -SPEED
+            self.up_down_velocity = -HORIZONTAL_SPEED
         elif key == keyboard.KeyCode.from_char('a'):  # set yaw counter clockwise velocity
-            self.yaw_velocity = -SPEED
+            self.yaw_velocity = -HORIZONTAL_SPEED
         elif key == keyboard.KeyCode.from_char('d'):  # set yaw clockwise velocity
-            self.yaw_velocity = SPEED
+            self.yaw_velocity = HORIZONTAL_SPEED
         elif key == keyboard.Key.esc:
             self.should_stop = True
         elif key == keyboard.Key.enter:

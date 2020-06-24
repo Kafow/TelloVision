@@ -37,5 +37,5 @@ class Recorder:
                 break
 
 
-recorder = Recorder(os.path.join(DATASET_PATH, 'up.avi'), FPS, 15)
+recorder = Recorder(os.path.join(DATASET_PATH, 'left.avi'), 25, 15)
 recorder.run()
