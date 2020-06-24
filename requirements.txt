@@ -1,0 +1,8 @@
+opencv-python
+tensorflow
+numpy
+imutils
+pygame
+tqdm
+gbvision
+pynput
