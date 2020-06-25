@@ -30,7 +30,8 @@ def process_image_gaussian(frame):
             if check_arrow(poly):
                 list_polygons_filtered = [poly]
                 break
-    drawn = gbv.draw_contours(np.zeros(frame.shape, np.uint8), list_polygons_filtered, (255, 255, 255), thickness=cv2.FILLED)
+    drawn = gbv.draw_contours(np.zeros(frame.shape, np.uint8), list_polygons_filtered, (255, 255, 255),
+                              thickness=cv2.FILLED)
     img = cv2.cvtColor(drawn, cv2.COLOR_BGR2GRAY)
     return img
 
@@ -49,9 +50,11 @@ def process_image_gaussian_adaptive(frame):
             if check_arrow(poly):
                 list_polygons_filtered = [poly]
                 break
-    drawn = gbv.draw_contours(np.zeros(frame.shape, np.uint8), list_polygons_filtered, (255, 255, 255), thickness=cv2.FILLED)
+    drawn = gbv.draw_contours(np.zeros(frame.shape, np.uint8), list_polygons_filtered, (255, 255, 255),
+                              thickness=cv2.FILLED)
     img = cv2.cvtColor(drawn, cv2.COLOR_BGR2GRAY)
     return img
+
 
 def process_image_color(frame):
     th = THRESHOLD(frame)
