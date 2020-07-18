@@ -7,10 +7,11 @@ from vision.vision import process_image_gaussian, process_image_gaussian_adaptiv
 from vision.CNN.clasifier import Classifier
 from constants import MODEL_PATH, LABELS_PATH
 
-tello = TelloController()
-tello.start_stream()
-receiver = TelloVideoReceiver()
-time.sleep(5)
+# tello = TelloController()
+# tello.start_stream()
+# receiver = TelloVideoReceiver()
+# time.sleep(5)
+receiver = cv2.VideoCapture(0)
 classifier = Classifier(MODEL_PATH, LABELS_PATH)
 
 while True:
